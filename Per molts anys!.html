@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Per molts anys!</title>
+<link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#e6dcff;--ink:#2b1b4a;--pink:#ff4f8b;--sun:#ffd23f;--teal:#1fb5a5;--card:#fff;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#2a1c4d;--ink:#fff3d6;--card:#3d2a6b}}
+:root[data-theme="dark"]{--bg:#2a1c4d;--ink:#fff3d6;--card:#3d2a6b}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:500 17px/1.55 "DM Sans",system-ui,sans-serif;overflow-x:hidden}
+h1,h2{font-family:"Bagel Fat One","Arial Black",sans-serif;font-weight:400;line-height:1.05;margin:0}
+h1{font-size:clamp(2.6rem,11vw,6rem);color:var(--pink);text-shadow:3px 3px 0 var(--sun)}
+h2{font-size:clamp(1.8rem,6vw,2.8rem);margin-bottom:.4em}
+section{max-width:720px;margin:0 auto;padding:56px 22px;text-align:center}
+button{font:inherit;font-weight:700;cursor:pointer;border:3px solid var(--ink);border-radius:999px;padding:.7em 1.4em;background:var(--sun);color:#2b1b4a;box-shadow:0 4px 0 var(--ink);transition:transform .1s,box-shadow .1s}
+button:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+button:focus-visible{outline:3px solid var(--pink);outline-offset:3px}
+#gift{font-size:7rem;background:none;border:0;box-shadow:none;padding:0;display:block;margin:24px auto;animation:wob 1.6s ease-in-out infinite}
+#gift.open{animation:none;transform:scale(1.2) rotate(-8deg)}
+@keyframes wob{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(6deg)}}
+#msg{min-height:3.2em;font-size:1.15rem}
+/* tarta */
+.cake{position:relative;width:260px;margin:50px auto 10px}
+.candles{display:flex;justify-content:space-around;padding:0 20px;height:70px;align-items:flex-end}
+.candle{width:14px;height:44px;background:repeating-linear-gradient(135deg,#fff 0 6px,var(--pink) 6px 12px);border:2px solid var(--ink);border-radius:3px;position:relative;padding:0;box-shadow:none;cursor:pointer}
+.flame{position:absolute;left:50%;top:-30px;width:16px;height:26px;margin-left:-8px;background:radial-gradient(#fff 15%,var(--sun) 45%,#ff8a1f);border-radius:50% 50% 50% 50%/65% 65% 35% 35%;transform-origin:50% 100%;animation:fl .35s ease-in-out infinite alternate}
+.candle.off .flame{display:none}
+@keyframes fl{to{transform:scale(1.08,.92) rotate(5deg)}}
+.tier{height:56px;border:3px solid var(--ink);border-radius:14px;background:var(--pink)}
+.tier.b{height:70px;width:112%;margin:-3px 0 0 -6%;background:var(--sun)}
+.tier.c{height:34px;width:124%;margin:-3px 0 0 -12%;background:var(--teal)}
+/* tarjetas */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:18px;margin-top:24px}
+.flip{perspective:800px;height:230px;background:none;border:0;box-shadow:none;padding:0;border-radius:0}
+.flip>div{position:relative;width:100%;height:100%;transition:transform .5s;transform-style:preserve-3d}
+.flip.on>div{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;border:3px solid var(--ink);border-radius:18px;display:flex;align-items:center;justify-content:center;padding:16px;background:var(--card);color:var(--ink);font-size:1rem}
+.face.f{font-family:"Bagel Fat One",sans-serif;font-size:1.35rem;background:var(--teal);color:#2b1b4a}
+.face.k{transform:rotateY(180deg);font-weight:500;font-size:.95rem}
+/* botón escurridizo */
+.arena{position:relative;height:150px;margin-top:20px}
+.arena button{position:absolute;top:40px;transition:left .25s,top .25s}
+#yes{left:calc(50% - 130px);background:var(--teal)}
+#no{left:calc(50% + 20px);background:var(--card);color:var(--ink)}
+#reply{min-height:2em;font-weight:700;color:var(--pink)}
+.letter{background:var(--card);border:3px solid var(--ink);border-radius:20px;padding:28px 24px;text-align:left;box-shadow:6px 6px 0 var(--pink);white-space:pre-line}
+canvas{position:fixed;inset:0;pointer-events:none;z-index:9}
+.hint{opacity:.7;font-size:.95rem}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+
+<section>
+  <h1 id="title"></h1>
+  <p id="sub"></p>
+  <button id="gift" aria-label="Obrir el regal">🎁</button>
+  <p id="msg" class="hint">Toca el regal. Tranquil·la, no mossega.</p>
+</section>
+
+<section>
+  <h2>Bufa les espelmes</h2>
+  <p class="hint">Toca cada flama per apagar-la. Una a una, que a tu les coses et surten millor amb una mica de drama.</p>
+  <div class="cake">
+    <div class="candles" id="candles"></div>
+    <div class="tier"></div><div class="tier b"></div><div class="tier c"></div>
+  </div>
+  <p id="wish" style="min-height:2em;font-weight:700"></p>
+</section>
+
+<section>
+  <h2 id="awardsTitle"></h2>
+  <p class="hint">Gira cada diploma.</p>
+  <div class="cards" id="cards"></div>
+</section>
+
+<section>
+  <h2>Una pregunta important</h2>
+  <p id="q"></p>
+  <div class="arena" id="arena">
+    <button id="yes">Sí, és clar</button>
+    <button id="no">No, gràcies</button>
+  </div>
+  <p id="reply"></p>
+</section>
+
+<section>
+  <h2>I ara, de debò</h2>
+  <div class="letter" id="letter"></div>
+</section>
+
+<script>
+/* ============ EDITA AQUÍ TUS DETALLES ============ */
+const CFG = {
+  nombre: "Edna",
+  edad: 17,
+  velas: 5, // quantes espelmes surten a la torta (no hi caben totes, és clar)
+  subtitulo: "Avui fas 17 anys i el món s'atura. Bé, almenys aquesta pàgina.",
+  regalo: "Dins hi ha una cosa molt cara: el meu afecte. I també un parell d'històries.",
+  premiosTitulo: "Premis oficials d'Edna",
+  premios: [
+    { titulo: "Reina dels àudios llargs", texto: "Per enviar àudios de 4 minuts que acaben amb «bé, que res». Tot i així els escolto tots." },
+    { titulo: "Millor companya de plans dubtosos", texto: "Per dir «només una beguda» i ser-hi 3 hores després socialitzant amb una planta de plàstic." },
+    { titulo: "Missió Fanlo: completada", texto: "Després de tant de temps esperant, per fi ha passat. Aplaudiments (i un pessic de «ja t'ho deia»)." },
+    { titulo: "Medalla a la millor decisió de l'any", texto: "Per no tornar amb l'Izan. Aquest any, per fi, el pròxim capítol és un altre." },
+    { titulo: "Col·leccionista d'amics meus", texto: "Per lligar-te a tots els meus amics, un a un. Algú pot deixar-me'n un de lliure, si us plau?" },
+    { titulo: "Guia de Fórmula 1", texto: "Llàstima que vam haver de veure com es retirava el Fernando i com l'Izan i l'Ari començaven a sortir, tot el mateix dia." },
+    { titulo: "Amiga de l'any (cada any)", texto: "Per aguantar-me, escoltar-me i fer-me riure quan més ho necessito. Sense tu això seria molt avorrit." }
+  ],
+  pregunta: "Vols fer un any més amb mi al teu costat?",
+  respuestaSi: "Sabia que diries que sí! Contracte signat per a tota la vida. No s'admeten devolucions.",
+  respuestaNo: ["Segura?", "Aquest botó està trencat.", "Va més ràpid que un Red Bull.", "Insistent, eh?", "Que no, que no.", "Val, em rendeixo: ara ja només queda el sí."],
+  carta: "Estimada Edna:\n\nGràcies per ser la meva millor amiga. Pels riures que no s'acaben, pels dies dolents que amb tu es converteixen en anècdotes, per escoltar-me sense jutjar-me i per ser-hi sempre, tant si és fàcil com si no.\n\nM'agrada com ets: com rius, com t'emociones, com estimes els teus. Tens un cor enorme i no canviaria res de tu.\n\nVull que aquest any vingui amb tot el bo que mereixes: bones notícies, bona gent i molts moments per recordar (i una mica de caos, que si no t'avorreixes).\n\nGràcies per ser casa. T'estimo moltíssim.\n\n— Jan Croissant"
+};
+/* ================================================= */
+
+const $=id=>document.getElementById(id), N=CFG.nombre;
+const sub=s=>s.replace(/NOMBRE/g,N);
+$("title").textContent=`Per molts anys, ${N}!`;
+$("sub").textContent=sub(CFG.subtitulo);
+$("awardsTitle").textContent=sub(CFG.premiosTitulo);
+$("q").textContent=sub(CFG.pregunta);
+$("letter").textContent=sub(CFG.carta);
+document.title=`Per molts anys, ${N}!`;
+
+/* confeti */
+const cv=$("cv"),cx=cv.getContext("2d");let parts=[],raf=0;
+function size(){cv.width=innerWidth;cv.height=innerHeight}size();addEventListener("resize",size);
+function confetti(n=140){
+  const cols=["#ff4f8b","#ffd23f","#1fb5a5","#7a5cff","#ff8a1f"];
+  for(let i=0;i<n;i++)parts.push({x:innerWidth/2,y:innerHeight*.45,vx:(Math.random()-.5)*16,vy:-Math.random()*14-4,r:Math.random()*6+4,c:cols[i%5],a:Math.random()*6,life:0});
+  if(!raf)loop();
+}
+function loop(){
+  cx.clearRect(0,0,cv.width,cv.height);
+  parts=parts.filter(p=>p.life<160);
+  parts.forEach(p=>{p.vy+=.35;p.x+=p.vx;p.y+=p.vy;p.a+=.2;p.life++;
+    cx.save();cx.translate(p.x,p.y);cx.rotate(p.a);cx.fillStyle=p.c;cx.globalAlpha=1-p.life/160;cx.fillRect(-p.r,-p.r/2,p.r*2,p.r);cx.restore()});
+  raf=parts.length?requestAnimationFrame(loop):0;
+}
+
+/* regalo */
+$("gift").onclick=function(){
+  this.classList.add("open");this.textContent="🎉";
+  $("msg").textContent=sub(CFG.regalo);$("msg").classList.remove("hint");confetti();
+};
+
+/* velas */
+let lit=CFG.velas;
+for(let i=0;i<CFG.velas;i++){
+  const b=document.createElement("button");b.className="candle";b.setAttribute("aria-label","Apagar espelma");
+  b.innerHTML='<span class="flame"></span>';
+  b.onclick=()=>{if(b.classList.contains("off"))return;b.classList.add("off");lit--;
+    if(!lit){$("wish").textContent="Demana un desig… i no l'expliquis a ningú (a mi sí).";confetti(200)}
+    else $("wish").textContent=lit===1?"Només en queda una!":"";};
+  $("candles").appendChild(b);
+}
+
+/* premios */
+CFG.premios.forEach(p=>{
+  const b=document.createElement("button");b.className="flip";
+  b.innerHTML=`<div><span class="face f"></span><span class="face k"></span></div>`;
+  b.querySelector(".f").textContent=sub(p.titulo);b.querySelector(".k").textContent=sub(p.texto);
+  b.onclick=()=>b.classList.toggle("on");$("cards").appendChild(b);
+});
+
+/* botón escurridizo */
+let dodges=0;const no=$("no"),arena=$("arena");
+function dodge(e){
+  if(dodges>=CFG.respuestaNo.length-1)return;
+  e.preventDefault();
+  const w=arena.clientWidth-no.offsetWidth,h=arena.clientHeight-no.offsetHeight;
+  no.style.left=Math.random()*w+"px";no.style.top=Math.random()*h+"px";
+  $("reply").textContent=CFG.respuestaNo[dodges++];
+  if(dodges>=CFG.respuestaNo.length-1){no.textContent="Val, sí";no.onclick=yes}
+}
+function yes(){$("reply").textContent=sub(CFG.respuestaSi);confetti(220)}
+no.addEventListener("mouseenter",dodge);no.addEventListener("touchstart",dodge,{passive:false});no.addEventListener("click",dodge);
+$("yes").onclick=yes;
+</script>
+</body>
+</html>
